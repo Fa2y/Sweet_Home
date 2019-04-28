@@ -1,0 +1,157 @@
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="icon" href="favicon.ico">
+
+    <title>Configuration Page</title>
+    
+
+    <!-- Bootstrap core CSS -->
+    <link href="bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <link href="signin.css" rel="stylesheet">
+  </head>
+
+  <body>
+
+    <div class="container">
+
+      <div >
+        <h1 class="form-signin-heading">Configuration:</h1>
+        <br>
+        <h2 class="form-signin-heading">Configuring Networks:</h2>
+        <table>
+          <tr>
+            <td>
+        <label>Choose The Current Network:</label>  
+        <select class="btn btn-secondary dropdown-toggle" onchange="Submit_usedNet();" id="select-Wifi">
+              <option value="" disabled selected>Choose your network</option>
+
+        </select>
+            </td>
+            <td>
+                <label>Choose a Network To Remove:</label>  
+                <select class="btn btn-secondary dropdown-toggle" onchange="Del_Net();" id="Del-Wifi">
+                      <option value="" disabled selected>Remove network</option>
+        
+                </select>
+              </td>
+      </tr>
+      </table>
+        <p id="result_net"></p>
+
+        <label for="inputSSID" class="sr-only">SSID</label>
+        <input  id="SSID" class="form-control" placeholder="SSID" autofocus>
+        <div class="checkbox" >
+            <label>
+              <input type="checkbox" id="PProtected" value="PProtected"> Password Protected?
+            </label>
+        </div>
+        <label for="inputPPasswordW" class="sr-only">Password</label>
+
+            <input type="password" id="inputPassword" class="form-control" placeholder="Password" >
+                        <div>
+       <button class="btn btn-lg btn-primary btn-block" id="addwifiB" OnClick="submit_wifi()">Add Wifi</button>
+        </div>
+        <p id="result_wifi"></p>
+        <br>
+        <h2 class="form-signin-heading">Configuring Devices:</h2>
+        <h3>Add Device:</h3>
+
+            <table>
+
+              <tr>
+                <td>
+                  <label>Choose Device:</label>
+                  <select class="btn btn-secondary dropdown-toggle" id= "select-device">
+                      <option value="" disabled selected>Choose the Device</option>
+                       <option value="DHT">Thermo/Humid sensor(DHT)</option>
+                       <option value="RGB">Light (RGB)</option>
+                       <option value="GSense">Gas sensor</option>
+                       <option value="MSense">Motion sensor</option>
+                       <option value="Ultrason">Ultrasonor (for Doors)</option>
+                       <option value="L">Light</option>
+                       <option value="ServoM">Servo-Motor (for gas/electricity cut)</option>
+                  </select>
+              
+
+        </td>
+        <td>
+                  <label>Choose Availble Pin:</label>
+                  <select class="btn btn-secondary dropdown-toggle" id= "select-pins">
+                      <option value="" disabled selected>Choose the Pin</option>
+                  </select>
+        </td>
+        <td>
+               <div id="echo-select">
+                <label>Choose Used Pin(for echo):</label>
+                <select class="btn btn-secondary dropdown-toggle" id= "select-pins-echo">
+                    <option value="" disabled selected>Choose the Pin(for echo)</option>
+
+                </select>
+              </div>
+        </td>
+      </tr>
+    </table>
+    <br>
+                <div>
+          <button class="btn btn-lg btn-primary btn-block" id="adddevice" OnClick="submit_device()">Add Device</button>
+        </div>
+        <p id="result_device"></p>
+        <h3>Delete Device:</h3>
+        <table>
+
+            <tr>
+              <td>
+                <label>Choose Device:</label>
+                <select class="btn btn-secondary dropdown-toggle" id= "del-device">
+                    <option value="" disabled selected>Choose the Device</option>
+                     <option value="DHT">Thermo/Humid sensor(DHT)</option>
+                     <option value="RGB">Light (RGB)</option>
+                     <option value="GSense">Gas sensor</option>
+                     <option value="MSense">Motion sensor</option>
+                     <option value="Ultrason">Ultrasonor (for Doors)</option>
+                     <option value="L">Light</option>
+                     <option value="ServoM">Servo-Motor (for gas/electricity cut)</option>
+                </select>
+            
+
+      </td>
+      <td>
+                <label>Choose Used Pin:</label>
+                <select class="btn btn-secondary dropdown-toggle" id= "del-pins">
+                    <option value="" disabled selected>Choose the Pin</option>
+
+                </select>
+      </td>
+      <td>
+
+      </td>
+    </tr>
+  </table>
+  <br>
+              <div>
+        <button class="btn btn-lg btn-primary btn-block" id="adddevice" OnClick="del_Dev()">Delete Device</button>
+      </div>
+      <p id="result_del_device"></p>
+       </div>
+
+       
+      </div>
+
+    </div> <!-- /container -->
+<!--     <script src="../Configuration.json"></script> -->
+    <script src="jquery-3.0.0.min.js"></script>
+    <script src="bootstrap.bundle.min.js"></script>
+    <script language="JavaScript" src="Config.js"></script>
+    
+
+
+  </body>
+</html>
