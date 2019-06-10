@@ -1,0 +1,7 @@
+user Admin
+topic readwrite #/#
+
+pattern readwrite %u/UpdateDevices
+pattern readwrite %u/Values
+pattern readwrite %u/ArmingMode
+pattern readwrite %u/Alarm
