@@ -67,10 +67,10 @@ def sub_cb(topic, msg):
         if topic == b'ArmingMode':
                 if msg == b'ON':
                         ArmingMode = True
-                        _thread.start_new_thread(Arming_Mode(), ())
+                        _thread.start_new_thread(Arming_Mode, [])
                 if msg == b'OFF':
                         ArmingMode = False
-        return MQTT_Client.wait_msg()
+        return While_checking()
 
 #in case of errors
 def restart_and_reconnect():
