@@ -34,7 +34,7 @@ def init_all():
         Devices = dict(config["Devices"][0])
         #Devices_Data is init here so it ease the job of writing data same structure on the config file
         Devices_Data = dict(config["Devices"][0])
-        #in Grab_DATA_Devices we don't need these three Devices
+        #in Grab_DATA_Devices_Send we don't need these three Devices
         Devices_Data.pop("Light")
         Devices_Data.pop("RGB")
         Devices_Data.pop("MSense")
@@ -59,18 +59,18 @@ def init_all():
 
 #subscribe callback function
 def sub_cb(topic, msg):
-        global Alarm, ArmingMode, MQTT_Client
+        global Alarm, ArmingMode, MQTT_Client, Mqtt_User
         print("Data published!!")
         print(topic, msg)
-        if topic == b'Alarm' and msg == b'OFF':
+        if topic == bytes(Mqtt_User+'Alarm','UTF-8') and msg == b'OFF':
                 Alarm = False
-        if topic == b'ArmingMode':
-                if msg == b'ON':
+        if topic == bytes(Mqtt_User+'/ArmingMode','UTF-8'):
+                if msg == b'ON' and ArmingMode == False:
                         ArmingMode = True
+                        print("Arms")
                         _thread.start_new_thread(Arming_Mode, [])
                 if msg == b'OFF':
                         ArmingMode = False
-        return While_checking()
 
 #in case of errors
 def restart_and_reconnect():
@@ -107,47 +107,47 @@ def Update_Device():
 def Grab_DATA_Devices_Send():
         from dht import DHT11
         from hcsr04 import HCSR04
-        from MQ import BaseMQ, MQ2
+        import MQ2
         global Devices_Data, Mqtt_User, MQTT_Client
         while True:
                 sleep(5)
 
 
-                j = 0
-                for i in Devices["DHT"]:
-                        DHT = DHT11(Pin(i, Pin.IN, Pin.PULL_UP))
-                        DHT.measure()
-                        Devices_Data["DHT"][j].append([DHT.temperature, DHT.humidity])
-                        j += 1
+                # j = 0
+                # for i in Devices["DHT"]:
+                #         DHT = DHT11(Pin(i, Pin.IN, Pin.PULL_UP))
+                #         DHT.measure()
+                #         Devices_Data["DHT"][j].append([DHT.temperature, DHT.humidity])
+                #         j += 1
 
 
 
-                j = 0
-                for i in Devices["GSense"]:
-                        GS = MQ2(pinData = i, baseVoltage = 5)
-                        GS.calibrate()
-                        Devices_Data["GSense"][j].append([GS.readSmoke(), GS.readLPG(), GS.readMethane(), readHydrogen()])
-                        #checking smoke (recheck the values online!!!)
-                        if Devices_Data["GSense"][j][0]>500 or Devices_Data["GSense"][j][1]>500:
-                                Alarm = True
-                                Fire_Gas_Alarm()
-                        j += 1
+                # j = 0
+                # for i in Devices["GSense"]:
+                #         GS = MQ2(pinData = i, baseVoltage = 5)
+                #         GS.calibrate()
+                #         Devices_Data["GSense"][j].append([GS.readSmoke(), GS.readLPG(), GS.readMethane(), readHydrogen()])
+                #         #checking smoke (recheck the values online!!!)
+                #         if Devices_Data["GSense"][j][0]>500 or Devices_Data["GSense"][j][1]>500:
+                #                 Alarm = True
+                #                 Fire_Gas_Alarm()
+                #         j += 1
 
 
 
-                j = 0
-                for i in Devices["Ultrason"]:
-                        US = HCSR04(trigger_pin=Devices["Ultrason"][0], echo_pin=Devices["Ultrason"][1])
-                        if US.distance_cm()>3.0:
-                                #Door id and the second value is bool either open or not
-                                Devices_Data["Ultrason"][j] = ["Door"+str(Devices["Ultrason"][0])+","+str(Devices["Ultrason"][1]),True]
-                        else:
-                                Devices_Data["Ultrason"][j] = ["Door"+str(Devices["Ultrason"][0])+","+str(Devices["Ultrason"][1]),True]
-                        j += 1
+                # j = 0
+                # for i in Devices["Ultrason"]:
+                #         US = HCSR04(trigger_pin=Devices["Ultrason"][0], echo_pin=Devices["Ultrason"][1])
+                #         if US.distance_cm()>3.0:
+                #                 #Door id and the second value is bool either open or not
+                #                 Devices_Data["Ultrason"][j] = ["Door"+str(Devices["Ultrason"][0])+","+str(Devices["Ultrason"][1]),True]
+                #         else:
+                #                 Devices_Data["Ultrason"][j] = ["Door"+str(Devices["Ultrason"][0])+","+str(Devices["Ultrason"][1]),True]
+                #         j += 1
 
 
                 try:
-                        MQTT_Client.publish(bytes("/"+Mqtt_User+"/Values","UTF-8"),bytes(str(Devices_Data),"UTF-8"))
+                        MQTT_Client.publish(bytes(Mqtt_User+"/Values","UTF-8"),bytes(str(Devices_Data),"UTF-8"))
                 except OSError as e:
                         restart_and_reconnect()
 
@@ -181,7 +181,7 @@ def Fire_Gas_Alarm():
 def Alarm(msg):
         global Alarm, MQTT_Client
         #publish msg
-        MQTT_Client.publish(bytes("/"+Mqtt_User+"/Alarm","UTF-8"),bytes(msg,"UTF-8"))
+        MQTT_Client.publish(bytes(Mqtt_User+"/Alarm","UTF-8"),bytes(msg,"UTF-8"))
         #send msg
         # while Alarm:
         #       #buzzer
@@ -199,16 +199,18 @@ def Arming_Mode():
         print("ArmingMode Activated!!")
         while ArmingMode:
                 sleep(1)
-                for i in Devices_Data["Ultrason"]:
+                for i in Devices_Data["Ultrason"]:     
                         if i[1] :
-                                Alarm("Alert!!: "+i[0]+"is open.")
+                                Alarm("Alert!!: "+str(i[0])+"is open.")
                 if Motion[0] :
                         Alarm("Alert!!: Motion detected in "+Motion[1]+".")
 def While_checking():
         global MQTT_Client
+        print("Checking for msg...",end="")
         while True:             
-                sleep(0.3)
+                sleep(1)
                 MQTT_Client.check_msg()
+                print(".",end="")
 
 def main():
         init_all()
@@ -228,6 +230,6 @@ connect()
 Update_Device()
 print("Starting thread!")
 _thread.start_new_thread(While_checking, [])
-print("LOLLOL")
+Grab_DATA_Devices_Send()
 # if __name__ == '__main__':
 #       main()
