@@ -14,6 +14,7 @@ Devices = {}
 Devices_Data = {}
 Mqtt_User = ''
 MQTT_Client = None
+MQTT_ClientID = ''
 Alarm = False
 ArmingMode = False
 Motion = [None, None]
@@ -55,6 +56,7 @@ def init_all():
         #Mqtt: Get username because we gonna need it after for publishing topics
         Mqtt_User = config["Mqtt_User"]
         #Mqtt: client with :clientid , Server ip/domain, username ,password
+        MQTT_ClientID = config["ClientID"]
         MQTT_Client = MQTTClient(config["ClientID"], config["Mqtt_Server"], user = config["Mqtt_User"], password = config["Mqtt_Pass"])
         #init phonenumbers for send alarm msg
         Phonenumbers = config["Phonenumbers"]
@@ -107,7 +109,7 @@ def Update_Device():
         Devices_to_send.pop("ServoM")
         Devices_to_send.pop("Buzzer")
         try:
-                MQTT_Client.publish(bytes(Mqtt_User+"/UpdateDevices","UTF-8"),bytes(str(Devices_to_send),"UTF-8"))
+                MQTT_Client.publish(bytes(Mqtt_User+"/UpdateDevices","UTF-8"),bytes("{'data':"+str(Devices_to_send)+",'clientid':"+MQTT_ClientID+"}","UTF-8"))
                 sleep(1)
         except OSError as e:
                 restart_and_reconnect()
@@ -156,7 +158,7 @@ def Grab_DATA_Devices_Send():
 
 
                 try:
-                        MQTT_Client.publish(bytes(Mqtt_User+"/Values","UTF-8"),bytes(str(Devices_Data),"UTF-8"))
+                        MQTT_Client.publish(bytes(Mqtt_User+"/Values","UTF-8"),bytes("{'data':"+str(Devices_Data)+",'clientid':"+MQTT_ClientID+"}","UTF-8"))
                 except OSError as e:
                         restart_and_reconnect()
 
@@ -190,9 +192,9 @@ def Fire_Gas_Alarm():
 def Alarm(msg):
         from sms import Sms
         sms = Sms()
-        global Alarm, MQTT_Client
+        global Alarm, MQTT_Client, MQTT_ClientID
         #publish msg
-        MQTT_Client.publish(bytes(Mqtt_User+"/Alarm","UTF-8"),bytes(msg,"UTF-8"))
+        MQTT_Client.publish(bytes(Mqtt_User+"/Alarm","UTF-8"),bytes("{'data':"+msg+",'clientid':"+MQTT_ClientID+"}","UTF-8"))
         for i in Phonenumbers:
                 sms.send_msg(i,msg)       
         # while Alarm:
