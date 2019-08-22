@@ -18,6 +18,7 @@ Alarm = False
 ArmingMode = False
 Motion = [None, None]
 Motion_Detectors = None
+Phonenumbers = []
 
 #this function initialise all public vars from the configuration file
 def init_all():
@@ -48,21 +49,22 @@ def init_all():
         Motion[1] = "INIT"
         #Declaring as a deque (FIFO) with max lenght of 1000 with interval of 30 sec so about 8 hours of data
         for i in Devices_Data["DHT"]:
-                i = ucollections.deque((), 1000)
+                i = ucollecftions.deque((), 1000)
         for i in Devices_Data["GSense"]:
                 i = ucollections.deque((), 1000)
         #Mqtt: Get username because we gonna need it after for publishing topics
         Mqtt_User = config["Mqtt_User"]
         #Mqtt: client with :clientid , Server ip/domain, username ,password
         MQTT_Client = MQTTClient(config["ClientID"], config["Mqtt_Server"], user = config["Mqtt_User"], password = config["Mqtt_Pass"])
-
+        #init phonenumbers for send alarm msg
+        Phonenumbers = config["Phonenumbers"]
 
 #subscribe callback function
 def sub_cb(topic, msg):
         global Alarm, ArmingMode, MQTT_Client, Mqtt_User
         print("Data published!!")
         print(topic, msg)
-        if topic == bytes(Mqtt_User+'Alarm','UTF-8') and msg == b'OFF':
+        if topic == bytes(Mqtt_User+'/Alarm','UTF-8') and msg == b'OFF':
                 Alarm = False
         if topic == bytes(Mqtt_User+'/ArmingMode','UTF-8'):
                 if msg == b'ON' and ArmingMode == False:
@@ -71,6 +73,13 @@ def sub_cb(topic, msg):
                         _thread.start_new_thread(Arming_Mode, [])
                 if msg == b'OFF':
                         ArmingMode = False
+        if topic == bytes(Mqtt_User+'/Light','UTF-8'):
+                if msg.decode("utf-8")[:2] == 'ON':
+                        light = Pin(int() , Pin.OUT)
+                        light.value(1)
+                elif msg.decode("utf-8")[:2] == "FF":
+                        light = Pin(int() , Pin.OUT)
+                        light.value(0)
 
 #in case of errors
 def restart_and_reconnect():
@@ -179,10 +188,13 @@ def Fire_Gas_Alarm():
 
 #ALARM!!! the msg is sent by mqtt to notify and sms(sms is not implemented yet)
 def Alarm(msg):
+        from sms import Sms
+        sms = Sms()
         global Alarm, MQTT_Client
         #publish msg
         MQTT_Client.publish(bytes(Mqtt_User+"/Alarm","UTF-8"),bytes(msg,"UTF-8"))
-        #send msg
+        for i in Phonenumbers:
+                sms.send_msg(i,msg)       
         # while Alarm:
         #       #buzzer
 
