@@ -50,9 +50,9 @@ def init_all():
         Motion[1] = "INIT"
         #Declaring as a deque (FIFO) with max lenght of 1000 with interval of 30 sec so about 8 hours of data
         for i in Devices_Data["DHT"]:
-                i = ucollecftions.deque((), 1000)
+                i = ucollecftions.deque((), 17280)
         for i in Devices_Data["GSense"]:
-                i = ucollections.deque((), 1000)
+                i = ucollections.deque((), 17280)
         #Mqtt: Get username because we gonna need it after for publishing topics
         Mqtt_User = config["Mqtt_User"]
         #Mqtt: client with :clientid , Server ip/domain, username ,password
