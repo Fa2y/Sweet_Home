@@ -1,6 +1,9 @@
 from microWebSrv import MicroWebSrv
-import network
+# import network
 import json
+
+
+
 def availble_pins():
 	all_pins = [2,4,5,12,14,15,16,17,18,19,21,22,23,25,26,27,32,33,34,35,36,39] #last 4 are input only
 	availble_pins = []
@@ -231,12 +234,12 @@ def _httpHandlerUsedPinGET(httpClient, httpResponse):
 
 # ----------------------------------------------------------------------------
 
-print("Config:Starting up the ap")
-ap_if = network.WLAN(network.AP_IF)
-ap_if.active(True)
-ap_if.config(essid = 'ESP32', password = 'microESP32', authmode = 3)
-ap_if.ifconfig(('1.1.1.1', '255.255.255.0', '1.0.0.0', '8.8.8.8'))
-print("Config:AP Started")
+# print("Config:Starting up the ap")
+# ap_if = network.WLAN(network.AP_IF)
+# ap_if.active(True)
+# ap_if.config(essid = 'ESP32', password = 'microESP32', authmode = 3)
+# ap_if.ifconfig(('1.1.1.1', '255.255.255.0', '1.0.0.0', '8.8.8.8'))
+# print("Config:AP Started")
 
 print("Config:Starting Web Server")
 srv = MicroWebSrv(webPath='config_web/')

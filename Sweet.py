@@ -76,12 +76,14 @@ def sub_cb(topic, msg):
                 if msg == b'OFF':
                         ArmingMode = False
         if topic == bytes(Mqtt_User+'/Light','UTF-8'):
-                if msg.decode("utf-8")[:2] == 'ON':
-                        light = Pin(int() , Pin.OUT)
+                if msg.decode("utf-8").split('-')[-1] == 'ON':
+                        light = Pin(int(msg.decode("utf-8").split('-')[1]) , Pin.OUT)
                         light.value(1)
-                elif msg.decode("utf-8")[:2] == "FF":
-                        light = Pin(int() , Pin.OUT)
+                elif msg.decode("utf-8").split('-')[-1] == "OFF":
+                        light = Pin(int(msg.decode("utf-8").split('-')[1]) , Pin.OUT)
                         light.value(0)
+        if topic == bytes(Mqtt_User+'/RGB','UTF-8'):
+                
 
 #in case of errors
 def restart_and_reconnect():
@@ -128,7 +130,7 @@ def Grab_DATA_Devices_Send():
                 # for i in Devices["DHT"]:
                 #         DHT = DHT11(Pin(i, Pin.IN, Pin.PULL_UP))
                 #         DHT.measure()
-                #         Devices_Data["DHT"][j].append([DHT.temperature, DHT.humidity])
+                #         Devices_Data["DHT"][j].append([i,DHT.temperature, DHT.humidity])
                 #         j += 1
 
 
