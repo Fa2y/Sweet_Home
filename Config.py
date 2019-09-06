@@ -5,7 +5,7 @@ import json
 
 
 def availble_pins():
-	all_pins = [2,4,5,12,14,15,16,17,18,19,21,22,23,25,26,27,32,33,34,35,36,39] #last 4 are input only
+	all_pins = [2,4,5,12,14,15,16,17,18,19,21,22,23,25,32,33,34,35,36,39] #last 4 are input only
 	availble_pins = []
 	with open("config_web/Configuration.json","r") as f:
 		conf = f.read()
@@ -162,6 +162,57 @@ def _httpHandlerUsed_NetPOST(httpClient, httpResponse):
 	print("Network Written!")
 
 
+#@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@MicroWebSrv.route('/mqtt','POST')
+def _httpHandlerUsed_mqttPost(httpClient, httpResponse):
+	print("WebServer:mqtt settings submitted")
+	
+	Data = httpClient.ReadRequestContent()
+	Mqtt = json.loads(Data.decode("UTF-8"))
+	with open("config_web/Configuration.json", "r") as f:
+		conf = f.read()
+	config = json.loads(conf)
+
+	if Mqtt["mqtt_User"] != "":
+		config["Mqtt_User"] = Mqtt["mqtt_User"]
+	
+	if Mqtt["mqtt_Pass"] != "":
+		config["Mqtt_Pass"] = Mqtt["mqtt_Pass"]
+
+	if Mqtt["mqtt_server"] != "":
+		config["Mqtt_Server"] = Mqtt["mqtt_server"]
+
+	with open("config_web/Configuration.json", 'w') as f:
+		json.dump(config, f)
+
+	httpResponse.WriteResponseOk( headers		 = None,
+							  contentType	 = "application/json",
+							  contentCharset = "UTF-8",
+							  content 		 = "Success:Mqtt Settings submitted" )
+	print("Webserver:Mqtt settings saved")
+
+
+#@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@MicroWebSrv.route('/phone','POST')
+def _httpHandlerUsed_mqttPost(httpClient, httpResponse):
+	print("WebServer:phone number adding...")
+	
+	Data = httpClient.ReadRequestContent()
+	phone = Data.decode("UTF-8")
+	with open("config_web/Configuration.json", "r") as f:
+		conf = f.read()
+	config = json.loads(conf)
+
+	config["Phonenumbers"].append(phone)
+
+	with open("config_web/Configuration.json", 'w') as f:
+		json.dump(config, f)
+
+	httpResponse.WriteResponseOk( headers		 = None,
+							  contentType	 = "application/json",
+							  contentCharset = "UTF-8",
+							  content 		 = "Success:Phone number Added" )
+	print("WebServer:Phone number Added")
 
 
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
@@ -231,6 +282,49 @@ def _httpHandlerUsedPinGET(httpClient, httpResponse):
 						  contentCharset = "UTF-8",
 						  content 		 = content )
 	print("WebServer: Used Pins Sent!!")
+
+#@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@MicroWebSrv.route("/phone","GET")
+def _httpHandlerUsedPinGET(httpClient, httpResponse):
+	print("WebServer: phone number GET")
+	
+	with open("config_web/Configuration.json", "r") as f:
+		conf = f.read()
+
+	config = json.loads(conf)
+	content = str(config["Phonenumbers"]).replace("'",'"')
+
+	httpResponse.WriteResponseOk( headers		 = None,
+						  contentType	 = "application/json",
+						  contentCharset = "UTF-8",
+						  content 		 = content )
+	print("WebServer: phone number Sent!!")
+
+#@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@MicroWebSrv.route('/Del_phone', 'POST')
+def _httpHandlerDelWifiPOST(httpClient, httpResponse):
+	print("WebServer: Deleting phone number...")
+	Data = httpClient.ReadRequestContent()
+	with open("config_web/Configuration.json", "r") as f:
+		conf = f.read()
+	config = json.loads(conf)
+	j = 0
+	for i in config["Phonenumbers"]:
+		if i == Data.decode("UTF-8"):
+			break
+		else:
+			j += 1
+
+	del config["Phonenumbers"][j]
+
+	with open("config_web/Configuration.json","w") as f:
+		json.dump(config,f)
+	httpResponse.WriteResponseOk( headers		 = None,
+							  contentType	 = "application/json",
+							  contentCharset = "UTF-8",
+							  content 		 = "Success:phone number Deleted!!" )
+	print("Webserver: phone number Deleted")
+
 
 # ----------------------------------------------------------------------------
 

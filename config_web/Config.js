@@ -2,17 +2,20 @@ $(document).ready(function() {
   Avai_Pin();
   Used_Pin();
   Avai_Net();
-
+  Avai_num();
       // Get the form fields and hidden div
   var checkbox = $("#PProtected");
   var hidden = $("#inputPassword");
+      //for mqtt settings
+  var checkbox2 = $("#mqtt_set");
+  var hidden2 = $("#mqtt_settings");
 
   
   // Hide the fields.
   // Use JS to do this in case the user doesn't have JS 
   // enabled.
   hidden.hide();
-  
+  hidden2.hide();
 
   var Devices = $("#select-device");
   var PINS_Add = $("#echo-select");
@@ -45,7 +48,19 @@ $(document).ready(function() {
 
     }
   });
+  checkbox2.change(function() {
+    // Check to see if the checkbox is checked.
+    // If not, hide the fields.
+    if (checkbox2.is(':checked')) {
+      // Show the hidden fields.
+      hidden2.show();
+    } else {
+      // Make sure that the hidden fields are indeed
+      // hidden.
+      hidden2.hide();
 
+    }
+  });
 });
 //GET Availble Pins
 function Avai_Pin(){
@@ -112,6 +127,26 @@ function Used_Pin(){
 xhttp1.open("GET", "/Delpins", true);
 xhttp1.send();
 }
+
+//Phone number
+function Avai_num(){
+
+    var xhttp2 = new XMLHttpRequest();
+    xhttp2.onreadystatechange = function() {
+    if (this.readyState == 4 && this.status == 200) {
+      var list = JSON.parse(xhttp2.responseText);
+
+      //reinit both select-wifi and del-wifi lists
+      $("#del-phone").empty();
+      $("#del-phone").append('<option value="" disabled selected>Choose phone number:</option>');
+      for (var i = 0; i < list.length; i++) {
+          $("#del-phone").append("<option value="+list[i]+">"+list[i]+"</option>");
+        }
+    }
+};
+xhttp2.open("GET", "/phone", true);
+xhttp2.send();
+ }
 
 //GET Availble Networks
 function Avai_Net(){
@@ -254,3 +289,70 @@ function submit_wifi(){
     }
   };
 }
+
+// submiting phone number
+function submit_phone(){
+
+  Phone = document.getElementById("phone_number").value;
+
+  
+  var xhttp = new XMLHttpRequest();
+  xhttp.open('POST', 'http://' + window.location.hostname + '/phone', true);
+  xhttp.setRequestHeader('Content-type', 'application/json');
+  xhttp.send(Phone)
+
+  xhttp.onreadystatechange = function() {
+    if (this.readyState == 4 && this.status == 200) {
+    //print the result of the submiting (error/succesfull)  
+  document.getElementById("result_phone").innerHTML = '<p id="result_phone" style="color:#74FF00">'+xhttp.responseText+'</p>'
+
+    }else{
+      document.getElementById("result_phone").innerHTML = '<dont id="result_phone" color="red">'+xhttp.responseText+'</font>'
+    }
+  };
+}
+// submiting mqtt settings
+function submit_mqtt(){
+
+  user = document.getElementById("mqtt_User").value;
+  pwd = document.getElementById("mqtt_Pass").value;
+  server = document.getElementById("mqtt_server").value;
+  dataa = '{"mqtt_User":"'+user+'","mqtt_Pass":"'+pwd+'","mqtt_server":"'+server+'"}';
+  
+  var xhttp = new XMLHttpRequest();
+  xhttp.open('POST', 'http://' + window.location.hostname + '/mqtt', true);
+  xhttp.setRequestHeader('Content-type', 'application/json');
+  xhttp.send(dataa)
+
+  xhttp.onreadystatechange = function() {
+    if (this.readyState == 4 && this.status == 200) {
+    //print the result of the submiting (error/succesfull)  
+  document.getElementById("result_mqtt").innerHTML = '<p id="result_mqtt" style="color:#74FF00">'+xhttp.responseText+'</p>'
+
+    }else{
+        document.getElementById("result_mqtt").innerHTML = '<font id="result_mqtt" color="red">'+xhttp.responseText+'</font>'
+
+    }
+  };
+}
+
+function Del_phone(){
+  
+  phone = document.getElementById("del-phone").value
+
+  var xhttp = new XMLHttpRequest();
+  xhttp.open('POST', 'http://' + window.location.hostname + '/Del_phone', true);
+  xhttp.setRequestHeader('Content-type', 'application/json')
+  xhttp.send(phone)
+
+  xhttp.onreadystatechange = function() {
+    if (this.readyState == 4 && this.status == 200) {
+         //print the result of the submiting (error/succesfull)  
+  document.getElementById("result_delphone").innerHTML = '<p id="result_delphone" style="color:#74FF00">'+xhttp.responseText+'</p>'
+  //reinit availbal-networks list 
+  Avai_num();
+    }
+  };      
+
+}
+

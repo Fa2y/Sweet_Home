@@ -20,6 +20,7 @@ ArmingMode = False
 Motion = [None, None]
 Motion_Detectors = None
 Phonenumbers = []
+msg={}
 
 #this function initialise all public vars from the configuration file
 def init_all():
@@ -48,11 +49,10 @@ def init_all():
         #init motion alarm
         Motion[0] = False
         Motion[1] = "INIT"
-        #Declaring as a deque (FIFO) with max lenght of 1000 with interval of 30 sec so about 8 hours of data
-        for i in Devices_Data["DHT"]:
-                i = ucollecftions.deque((), 17280)
-        for i in Devices_Data["GSense"]:
-                i = ucollections.deque((), 17280)
+        #Declaring as list
+        Devices_Data["DHT"]=[]
+        Devices_Data["GSense"]=[]
+
         #Mqtt: Get username because we gonna need it after for publishing topics
         Mqtt_User = config["Mqtt_User"]
         #Mqtt: client with :clientid , Server ip/domain, username ,password
@@ -83,6 +83,7 @@ def sub_cb(topic, msg):
                         light = Pin(int(msg.decode("utf-8").split('-')[1]) , Pin.OUT)
                         light.value(0)
         if topic == bytes(Mqtt_User+'/RGB','UTF-8'):
+
                 
 
 #in case of errors
@@ -125,38 +126,36 @@ def Grab_DATA_Devices_Send():
         while True:
                 sleep(5)
 
-
-                # j = 0
-                # for i in Devices["DHT"]:
-                #         DHT = DHT11(Pin(i, Pin.IN, Pin.PULL_UP))
-                #         DHT.measure()
-                #         Devices_Data["DHT"][j].append([i,DHT.temperature, DHT.humidity])
-                #         j += 1
+                dht:[pin,[],[]]
+                for i in Devices["DHT"]:
+                        DHT = DHT11(Pin(i, Pin.IN, Pin.PULL_UP))
+                        DHT.measure()
+                        Devices_Data["DHT"].append([i,DHT.temperature, DHT.humidity])
 
 
 
-                # j = 0
-                # for i in Devices["GSense"]:
-                #         GS = MQ2(pinData = i, baseVoltage = 5)
-                #         GS.calibrate()
-                #         Devices_Data["GSense"][j].append([GS.readSmoke(), GS.readLPG(), GS.readMethane(), readHydrogen()])
-                #         #checking smoke (recheck the values online!!!)
-                #         if Devices_Data["GSense"][j][0]>500 or Devices_Data["GSense"][j][1]>500:
-                #                 Alarm = True
-                #                 Fire_Gas_Alarm()
-                #         j += 1
+
+                for i in Devices["GSense"]:
+                        GS = MQ2(pinData = i, baseVoltage = 5)
+                        GS.calibrate()
+                        Devices_Data["GSense"].append([i,GS.readSmoke(), GS.readLPG(), GS.readMethane(), readHydrogen()])
+                        #checking smoke (recheck the values online!!!)
+                        if Devices_Data["GSense"][j][0]>500 or Devices_Data["GSense"][j][1]>500:
+                                Alarm = True
+                                Fire_Gas_Alarm()
 
 
 
-                # j = 0
-                # for i in Devices["Ultrason"]:
-                #         US = HCSR04(trigger_pin=Devices["Ultrason"][0], echo_pin=Devices["Ultrason"][1])
-                #         if US.distance_cm()>3.0:
-                #                 #Door id and the second value is bool either open or not
-                #                 Devices_Data["Ultrason"][j] = ["Door"+str(Devices["Ultrason"][0])+","+str(Devices["Ultrason"][1]),True]
-                #         else:
-                #                 Devices_Data["Ultrason"][j] = ["Door"+str(Devices["Ultrason"][0])+","+str(Devices["Ultrason"][1]),True]
-                #         j += 1
+
+                j = 0
+                for i in Devices["Ultrason"]:
+                        US = HCSR04(trigger_pin=i[0], echo_pin=i[1])
+                        if US.distance_cm()>3.0:
+                                #Door id and the second value is bool either open or not
+                                Devices_Data["Ultrason"][j] = [i[0],{"value":True}]
+                        else:
+                                Devices_Data["Ultrason"][j] = [i[0],{"value":False}]
+                        j += 1
 
 
                 try:
@@ -183,7 +182,7 @@ def Connect_Wifi():
 #raise a special alarm for gas and fire (it shut down the gas outlets with a servo)
 def Fire_Gas_Alarm():
         global Devcies
-        msg = "Alert:Fire or Gas leak!!"
+        msg["data"] = "gaz"
         for i in Devices["ServoM"]:
                 s = Pin(i)
                 servo = PWM(s, freq=50)
@@ -193,13 +192,18 @@ def Fire_Gas_Alarm():
 #ALARM!!! the msg is sent by mqtt to notify and sms(sms is not implemented yet)
 def Alarm(msg):
         from sms import Sms
+
         sms = Sms()
         global Alarm, MQTT_Client, MQTT_ClientID
+        msg["alarm"] = True
         #publish msg
-        MQTT_Client.publish(bytes(Mqtt_User+"/Alarm","UTF-8"),bytes("{'data':"+msg+",'clientid':"+MQTT_ClientID+"}","UTF-8"))
+        MQTT_Client.publish(bytes(Mqtt_User+"/Alarm","UTF-8"),bytes("{'data':'"+msg+",'clientid':"+MQTT_ClientID+"}","UTF-8"))
         for i in Phonenumbers:
-                sms.send_msg(i,msg)       
-        # while Alarm:
+                sms.send_msg(i,"SweetHome ALARM!!: \n alarm of type"+msg["data"])       
+        button = Pin(26, Pin.IN)
+        while Alarm and not(button.value()):
+                sleep(1)
+                print("buzzer!!!")
         #       #buzzer
 
 

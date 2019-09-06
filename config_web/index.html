@@ -141,11 +141,56 @@
       </div>
       <p id="result_del_device"></p>
        </div>
+       <div>
+        <h3>Phone Numbers:</h3>
+        <br>
+            <p>Add Phone Number:</p>
+            <input  id="phone_number" class="form-control" placeholder="+213555653446" autofocus>
+            <font color="grey" >*Don't forget country code (+213)</font>
+            <p id="result_phone"></p>
+                 <button class="btn btn-lg btn-primary btn-block" id="addphone" OnClick="submit_phone()">Add Phone number</button>
+            <p>Delete Phone Number:</p>
+            <select class="btn btn-secondary dropdown-toggle" id= "del-phone">
+                <option value="" disabled selected>Choose phone number:</option>
+            </select>
+                 <button class="btn btn-lg btn-primary btn-block" id="del-phone" OnClick="Del_phone()">Delete Phone number</button>
+        <p id = "result_delphone"></p>
 
-       
+       </div>
+               <div class="checkbox" >
+            <label>
+              <input type="checkbox" id="mqtt_set" value="PProtected"> Mqtt Settings
+            </label>
+            <font color=red>Caution!!! Sweet employees only</font>
+
+        </div>
+       <div id="mqtt_settings">
+      <h3>MQTT Settings:</h3> 
+      <br>
+      <font color=red>changing mqtt settings may effect your device preformance!!!</font>
+      <table><tr><td>
+      <p>Username:</p>
+    </td><td>
+      <input  id="mqtt_User" class="form-control" placeholder="MQTT Username" autofocus>
+    </td></tr><tr><td>
+      <p>Password:</p>
+      </td><td>
+      <input  id="mqtt_Pass" type="password" class="form-control" placeholder="Password" autofocus>
+    </td></tr><tr><td>
+      <p>MQTT Server:</p>
+      </td><td>
+      <input  id="mqtt_server" class="form-control" placeholder="MQTT Server" autofocus>
+      <p id="result_mqtt"></p>
+      </td>
+    </tr><tr><td>
+     <button class="btn btn-lg btn-primary btn-block" id="adddevice" OnClick="submit_mqtt()">Submit</button>
+      </td></tr>
+    </table>
+      </div>
       </div>
 
-    </div> <!-- /container -->
+    </div>
+     <!-- /container -->
 <!--     <script src="../Configuration.json"></script> -->
     <script src="jquery-3.0.0.min.js"></script>
     <script src="bootstrap.bundle.min.js"></script>

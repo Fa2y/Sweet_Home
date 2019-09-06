@@ -7,11 +7,11 @@ def config_mod():
 	import Config
 
 def wait_for_config():
-    button = Pin(0, Pin.IN, Pin.PULL_UP)
+    button = Pin(27, Pin.IN)
     LED = Pin(2, Pin.OUT) 
     for i in range(2):
         print('interation'+str(i))
-        if not(button.value()):
+        if button.value():
             config_mod()
             break
         LED.value(1)
