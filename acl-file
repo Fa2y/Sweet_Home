@@ -5,3 +5,5 @@ pattern readwrite %u/UpdateDevices
 pattern readwrite %u/Values
 pattern readwrite %u/ArmingMode
 pattern readwrite %u/Alarm
+pattern readwrite %u/RGB
+pattern readwrite %u/Light

@@ -218,8 +218,9 @@ function del_Dev(){
   if (typeof Pin == "number" ){
   data = '{"Device_type":"'+device+'","device_pin":"'+Pin+'"}'
   }else{
-    data = '{"Device_type":"'+device+'","device_pin":"'+Pin[0]+'","device_pin_echo":"'+Pin[1]+'"}'
+    data = '{"Device_type":"'+device +'","device_pin":"'+Pin[0]+'","device_pin_echo":"'+Pin[1]+'"}'
   }
+  console.log(data)
   var xhttp = new XMLHttpRequest();
   xhttp.open('POST', 'http://' + window.location.hostname + '/DelDevice', true);
   xhttp.setRequestHeader('Content-type', 'applicationl/json')

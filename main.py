@@ -9,7 +9,7 @@ def config_mod():
 def wait_for_config():
     button = Pin(27, Pin.IN)
     LED = Pin(2, Pin.OUT) 
-    for i in range(2):
+    for i in range(4):
         print('interation'+str(i))
         if button.value():
             config_mod()

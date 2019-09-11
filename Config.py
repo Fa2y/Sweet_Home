@@ -1,5 +1,5 @@
 from microWebSrv import MicroWebSrv
-# import network
+import network
 import json
 
 
@@ -94,7 +94,7 @@ def _httpHandlerDevicePost(httpClient, httpResponse) :
 		conf = f.read()
 	config = json.loads(conf)
 	try:
-		if len(Devices) == 2:
+		if Devices["Device_type"]!= "Ultrason":
 			config["Devices"][0][Devices["Device_type"]].append(int(Devices["device_pin"]))
 		else:
 			config["Devices"][0][Devices["Device_type"]].append([int(Devices["device_pin"]), int(Devices["device_pin_echo"])])
@@ -255,8 +255,10 @@ def _httpHandlerDelWifiPOST(httpClient, httpResponse):
 		conf = f.read()
 	
 	config = json.loads(conf)
-
-	config["Devices"][0][Devices["Device_type"]].remove([int(Devices["device_pin"]), int(Devices["device_pin_echo"])])
+	if Devices["Device_type"]=="Ultrason":
+		config["Devices"][0][Devices["Device_type"]].remove([int(Devices["device_pin"]), int(Devices["device_pin_echo"])])
+	else:
+		config["Devices"][0][Devices["Device_type"]].remove(int(Devices["device_pin"]))
 
 
 
@@ -328,12 +330,12 @@ def _httpHandlerDelWifiPOST(httpClient, httpResponse):
 
 # ----------------------------------------------------------------------------
 
-# print("Config:Starting up the ap")
-# ap_if = network.WLAN(network.AP_IF)
-# ap_if.active(True)
-# ap_if.config(essid = 'ESP32', password = 'microESP32', authmode = 3)
-# ap_if.ifconfig(('1.1.1.1', '255.255.255.0', '1.0.0.0', '8.8.8.8'))
-# print("Config:AP Started")
+print("Config:Starting up the ap")
+ap_if = network.WLAN(network.AP_IF)
+ap_if.active(True)
+ap_if.config(essid = 'ESP32', password = 'microESP32', authmode = 3)
+ap_if.ifconfig(('1.1.1.1', '255.255.255.0', '1.0.0.0', '8.8.8.8'))
+print("Config:AP Started")
 
 print("Config:Starting Web Server")
 srv = MicroWebSrv(webPath='config_web/')

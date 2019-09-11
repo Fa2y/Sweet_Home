@@ -83,7 +83,7 @@ def sub_cb(topic, msg):
                         light = Pin(int(msg.decode("utf-8").split('-')[1]) , Pin.OUT)
                         light.value(0)
         if topic == bytes(Mqtt_User+'/RGB','UTF-8'):
-
+                pass
                 
 
 #in case of errors
@@ -126,7 +126,7 @@ def Grab_DATA_Devices_Send():
         while True:
                 sleep(5)
 
-                dht:[pin,[],[]]
+                #dht:[pin,[],[]]
                 for i in Devices["DHT"]:
                         DHT = DHT11(Pin(i, Pin.IN, Pin.PULL_UP))
                         DHT.measure()
@@ -135,14 +135,14 @@ def Grab_DATA_Devices_Send():
 
 
 
-                for i in Devices["GSense"]:
-                        GS = MQ2(pinData = i, baseVoltage = 5)
-                        GS.calibrate()
-                        Devices_Data["GSense"].append([i,GS.readSmoke(), GS.readLPG(), GS.readMethane(), readHydrogen()])
-                        #checking smoke (recheck the values online!!!)
-                        if Devices_Data["GSense"][j][0]>500 or Devices_Data["GSense"][j][1]>500:
-                                Alarm = True
-                                Fire_Gas_Alarm()
+                # for i in Devices["GSense"]:
+                #         GS = MQ2(pinData = i, baseVoltage = 5)
+                #         GS.calibrate()
+                #         Devices_Data["GSense"].append([i,GS.readSmoke(), GS.readLPG(), GS.readMethane(), readHydrogen()])
+                #         #checking smoke (recheck the values online!!!)
+                #         if Devices_Data["GSense"][j][0]>500 or Devices_Data["GSense"][j][1]>500:
+                #                 Alarm = True
+                #                 Fire_Gas_Alarm()
 
 
 
@@ -230,26 +230,23 @@ def While_checking():
         while True:             
                 sleep(1)
                 MQTT_Client.check_msg()
-                print(".",end="")
 
-def main():
-        init_all()
 
-        Connect_Wifi()
 
-        connect()
 
-        Update_Device()
-
-        _thread.start_new_thread(MQTT_Client.wait_msg(), ())
-
-        Grab_DATA_Devices_Send()
 init_all()
+
 Connect_Wifi()
+
 connect()
+
 Update_Device()
+
 print("Starting thread!")
+
 _thread.start_new_thread(While_checking, [])
+
 Grab_DATA_Devices_Send()
+
 # if __name__ == '__main__':
 #       main()
