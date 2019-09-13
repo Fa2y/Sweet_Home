@@ -19,17 +19,38 @@ $(document).ready(function() {
 
   var Devices = $("#select-device");
   var PINS_Add = $("#echo-select");
-
+  var RGBpin = $("#RGB-select");
   PINS_Add.hide();
-
+  RGBpin.hide();
 
   Devices.change(function(){
     if (Devices.val() == "Ultrason"){
 
       PINS_Add.show();
+      RGBpin.hide();
+      document.getElementById("echo").innerHTML = "Choose the Pin(echo):"
+      document.getElementById("echo_op").innerHTML = "Choose the Pin(echo):"
+
+      document.getElementById("select-origin").innerHTML = "Choose the Pin:"
+      document.getElementById("origin-select").innerHTML = "Choose the Pin:"
+    }else if(Devices.val() == "RGB"){
+      PINS_Add.show();
+      RGBpin.show();
+      document.getElementById("echo").innerHTML = "Choose the Pin(Green):"
+      document.getElementById("echo_op").innerHTML = "Choose the Pin(Green):"
+
+      document.getElementById("select-origin").innerHTML = "Choose the Pin(Red):"
+      document.getElementById("origin-select").innerHTML = "Choose the Pin(Red):"
+
 
     }else{
+      RGBpin.hide();
       PINS_Add.hide();
+      document.getElementById("echo").innerHTML = "Choose the Pin(echo):"
+      document.getElementById("echo_op").innerHTML = "Choose the Pin(echo):"
+
+      document.getElementById("select-origin").innerHTML = "Choose the Pin:"
+      document.getElementById("origin-select").innerHTML = "Choose the Pin:"
     }
   })
 
@@ -73,12 +94,15 @@ xhttp.onreadystatechange = function() {
       //reinit the pins list 
       $("#select-pins").empty();
       $("#select-pins-echo").empty();
-      $("#select-pins").append("<option value='' disabled selected>Choose the Pin</option>");
-      $("#select-pins-echo").append("<option value='' disabled selected>Choose the Pin(for echo)</option>");
+      $("#select-RGB-B").empty();
+      $("#select-pins").append("<option id='origin-select' value='' disabled selected>Choose the Pin</option>");
+      $("#select-pins-echo").append("<option id='echo_op' value='' disabled selected>Choose the Pin(for echo)</option>");
+      $("#select-RGB-B").append("<option value='' disabled selected>Choose the Pin(Blue)</option>");
       for (var i = 0; i < list.length; i++) {
     
           $("#select-pins").append("<option value="+list[i]+">"+list[i]+"</option>");
           $("#select-pins-echo").append("<option value="+list[i]+">"+list[i]+"</option>");
+          $("#select-RGB-B").append("<option value="+list[i]+">"+list[i]+"</option>");
         }
     }
 };
@@ -217,10 +241,12 @@ function del_Dev(){
 
   if (typeof Pin == "number" ){
   data = '{"Device_type":"'+device+'","device_pin":"'+Pin+'"}'
-  }else{
+  }else if (device == "Ultrason"){
     data = '{"Device_type":"'+device +'","device_pin":"'+Pin[0]+'","device_pin_echo":"'+Pin[1]+'"}'
+  }else{
+    data = '{"Device_type":"'+device +'","R":"'+Pin[0]+'","G":"'+Pin[1]+'","B":"'+Pin[2]+'"}'
   }
-  console.log(data)
+  
   var xhttp = new XMLHttpRequest();
   xhttp.open('POST', 'http://' + window.location.hostname + '/DelDevice', true);
   xhttp.setRequestHeader('Content-type', 'applicationl/json')
@@ -247,10 +273,13 @@ function submit_device(){
   device = document.getElementById("select-device").value
   Pin = document.getElementById("select-pins").value
   Pin_echo = document.getElementById("select-pins-echo").value
-  if (Pin_echo == null ){
-  data = '{"Device_type":"'+device+'","device_pin":"'+Pin+'"}'
+  Pin_rgb = document.getElementById("select-RGB-B").value
+  if ($("#select-device").val() == "Ultrason" ){
+  data = '{"Device_type":"'+device+'","device_pin":"'+Pin+'","device_pin_echo":"'+Pin_echo+'"}'
+   }else if($("#select-device").val() == "RGB"){
+  data = '{"Device_type":"'+device+'","device_pins":['+Pin+','+Pin_echo+','+Pin_rgb+']}'  
   }else{
-    data = '{"Device_type":"'+device+'","device_pin":"'+Pin+'","device_pin_echo":"'+Pin_echo+'"}'
+  data = '{"Device_type":"'+device+'","device_pin":"'+Pin+'"}' 
   }
 
   var xhttp = new XMLHttpRequest();
@@ -290,7 +319,20 @@ function submit_wifi(){
     }
   };
 }
+// send signal to reset the device
+function reset_device(){
+  var xhttp = new XMLHttpRequest();
+  xhttp.open('POST', 'http://' + window.location.hostname + '/reset', true);
+  xhttp.setRequestHeader('Content-type', 'application/json');
+  xhttp.send()
 
+  xhttp.onreadystatechange = function(){
+    if(this.readyState == 4 && this.status == 200){
+        document.getElementById("reset").innerHTML = "Restarting device..."
+      }
+
+  };
+}
 // submiting phone number
 function submit_phone(){
 

@@ -23,6 +23,7 @@
     <div class="container">
 
       <div >
+
         <h1 class="form-signin-heading">Configuration:</h1>
         <br>
         <h2 class="form-signin-heading">Configuring Networks:</h2>
@@ -84,16 +85,25 @@
 
         </td>
         <td>
-                  <label>Choose Availble Pin:</label>
+                  <label id='select-origin'>Choose Availble Pin:</label>
                   <select class="btn btn-secondary dropdown-toggle" id= "select-pins">
-                      <option value="" disabled selected>Choose the Pin</option>
+                      <option id='origin-select'value="" disabled selected>Choose the Pin</option>
                   </select>
         </td>
         <td>
                <div id="echo-select">
-                <label>Choose Used Pin(for echo):</label>
+                <label id='echo'>Choose the Pin(for echo):</label>
                 <select class="btn btn-secondary dropdown-toggle" id= "select-pins-echo">
-                    <option value="" disabled selected>Choose the Pin(for echo)</option>
+                    <option id ='echo_op'value="" disabled selected>Choose the Pin(for echo)</option>
+
+                </select>
+              </div>
+        </td>
+           <td>
+           <div id="RGB-select">
+            <label>Choose the Pin(Blue):</label>
+                <select class="btn btn-secondary dropdown-toggle" id= "select-RGB-B">
+                <option value="" disabled selected>Choose the Pin(Blue)</option>
 
                 </select>
               </div>
@@ -185,17 +195,19 @@
       <p id="result_mqtt"></p>
       </td>
     </tr><tr><td>
-     <button class="btn btn-lg btn-primary btn-block" id="adddevice" OnClick="submit_mqtt()">Submit</button>
+     <button class="btn btn-lg btn-primary btn-block" id="submitmqtt" OnClick="submit_mqtt()">Submit</button>
       </td></tr>
     </table>
       </div>
       </div>
-
+      <button class="btn btn-lg btn-primary btn-block" OnClick="reset_device()">DONE</button>
+      <br>
+      <h3 id="reset" style = "text-align: center;color: #00FF00;"></h3>
     </div>
      <!-- /container -->
 <!--     <script src="../Configuration.json"></script> -->
     <script src="jquery-3.0.0.min.js"></script>
-    <script src="bootstrap.bundle.min.js"></script>
+<!--     <script src="bootstrap.bundle.min.js"></script> -->
     <script language="JavaScript" src="Config.js"></script>
     
 

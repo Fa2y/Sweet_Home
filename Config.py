@@ -1,5 +1,5 @@
 from microWebSrv import MicroWebSrv
-import network
+# import network
 import json
 
 
@@ -93,11 +93,14 @@ def _httpHandlerDevicePost(httpClient, httpResponse) :
 	with open("config_web/Configuration.json", 'r') as f:
 		conf = f.read()
 	config = json.loads(conf)
+
 	try:
-		if Devices["Device_type"]!= "Ultrason":
-			config["Devices"][0][Devices["Device_type"]].append(int(Devices["device_pin"]))
-		else:
+		if Devices["Device_type"]== "Ultrason":
 			config["Devices"][0][Devices["Device_type"]].append([int(Devices["device_pin"]), int(Devices["device_pin_echo"])])
+		elif Devices["Device_type"]== "RGB":
+			config["Devices"][0][Devices["Device_type"]].append(Devices["device_pins"])
+		else:
+			config["Devices"][0][Devices["Device_type"]].append(int(Devices["device_pin"]))
 		content = "style='color:#74FF00'>Success:Device Added!"
 	except:
 		content = "style='color:#FF0000'>Error:Fill the Data"
@@ -249,14 +252,18 @@ def _httpHandlerDelWifiPOST(httpClient, httpResponse):
 def _httpHandlerDelWifiPOST(httpClient, httpResponse):
 	print("WebServer: Deleting Device")
 	Data = httpClient.ReadRequestContent()
+	print(Data)
 	Devices = json.loads(Data.decode("UTF-8"))
 
 	with open("config_web/Configuration.json", "r") as f:
 		conf = f.read()
-	
+	print("problem??")
 	config = json.loads(conf)
 	if Devices["Device_type"]=="Ultrason":
 		config["Devices"][0][Devices["Device_type"]].remove([int(Devices["device_pin"]), int(Devices["device_pin_echo"])])
+	elif Devices["Device_type"] == "RGB":
+		print("Right device")
+		config["Devices"][0][Devices["Device_type"]].remove([int(Devices["R"]), int(Devices["G"]),int(Devices["B"])])
 	else:
 		config["Devices"][0][Devices["Device_type"]].remove(int(Devices["device_pin"]))
 
@@ -301,10 +308,21 @@ def _httpHandlerUsedPinGET(httpClient, httpResponse):
 						  contentCharset = "UTF-8",
 						  content 		 = content )
 	print("WebServer: phone number Sent!!")
+#@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@MicroWebSrv.route('/reset', 'POST')
+def _httpHandlerRESTPOST(httpClient, httpResponse):
+	print("WebServer: reset device!!")
+	import machine
+	
+	httpResponse.WriteResponseOk( headers		 = None,
+						  contentType	 = "application/json",
+						  contentCharset = "UTF-8",
+						  content 		 = "Success!!")
+	machine.reset()
 
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 @MicroWebSrv.route('/Del_phone', 'POST')
-def _httpHandlerDelWifiPOST(httpClient, httpResponse):
+def _httpHandlerDelPhonePOST(httpClient, httpResponse):
 	print("WebServer: Deleting phone number...")
 	Data = httpClient.ReadRequestContent()
 	with open("config_web/Configuration.json", "r") as f:
@@ -330,12 +348,12 @@ def _httpHandlerDelWifiPOST(httpClient, httpResponse):
 
 # ----------------------------------------------------------------------------
 
-print("Config:Starting up the ap")
-ap_if = network.WLAN(network.AP_IF)
-ap_if.active(True)
-ap_if.config(essid = 'ESP32', password = 'microESP32', authmode = 3)
-ap_if.ifconfig(('1.1.1.1', '255.255.255.0', '1.0.0.0', '8.8.8.8'))
-print("Config:AP Started")
+# print("Config:Starting up the ap")
+# ap_if = network.WLAN(network.AP_IF)
+# ap_if.active(True)
+# ap_if.config(essid = 'ESP32', password = 'microESP32', authmode = 3)
+# ap_if.ifconfig(('1.1.1.1', '255.255.255.0', '1.0.0.0', '8.8.8.8'))
+# print("Config:AP Started")
 
 print("Config:Starting Web Server")
 srv = MicroWebSrv(webPath='config_web/')

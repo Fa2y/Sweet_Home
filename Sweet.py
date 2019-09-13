@@ -5,7 +5,7 @@ import json
 from umqtt.simple import MQTTClient
 import ucollections
 import _thread
-
+from RGB import RGBLed
 
 #all public vars
 Wifi_SSID = ''
@@ -57,6 +57,7 @@ def init_all():
         Mqtt_User = config["Mqtt_User"]
         #Mqtt: client with :clientid , Server ip/domain, username ,password
         MQTT_ClientID = config["ClientID"]
+        print(config["Mqtt_Server"]+"----"+config["ClientID"])
         MQTT_Client = MQTTClient(config["ClientID"], config["Mqtt_Server"], user = config["Mqtt_User"], password = config["Mqtt_Pass"])
         #init phonenumbers for send alarm msg
         Phonenumbers = config["Phonenumbers"]
@@ -83,7 +84,8 @@ def sub_cb(topic, msg):
                         light = Pin(int(msg.decode("utf-8").split('-')[1]) , Pin.OUT)
                         light.value(0)
         if topic == bytes(Mqtt_User+'/RGB','UTF-8'):
-                pass
+                if msg.decode("UTF-8").split('-')[-1] == 'ON':
+                        rgb = RGBLed()
                 
 
 #in case of errors
@@ -104,6 +106,7 @@ def connect():
                 MQTT_Client.subscribe(Mqtt_User+"/ArmingMode")
                 MQTT_Client.subscribe(Mqtt_User+"/Alarm")
         except OSError as e:
+                print(e)
                 restart_and_reconnect()
 #update all data on startup od the esp it send the list of devices to structure it in the db
 def Update_Device():
@@ -192,7 +195,6 @@ def Fire_Gas_Alarm():
 #ALARM!!! the msg is sent by mqtt to notify and sms(sms is not implemented yet)
 def Alarm(msg):
         from sms import Sms
-
         sms = Sms()
         global Alarm, MQTT_Client, MQTT_ClientID
         msg["alarm"] = True
@@ -203,8 +205,11 @@ def Alarm(msg):
         button = Pin(26, Pin.IN)
         while Alarm and not(button.value()):
                 sleep(1)
-                print("buzzer!!!")
-        #       #buzzer
+                beeper = PWM(Pin(14, Pin.OUT), freq=440, duty=512)
+                time.sleep(0.3)
+                beeper.deinit()
+                time.sleep(0.3)
+
 
 
 #handler function for the interrupt
